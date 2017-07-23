@@ -1,0 +1,7 @@
+{
+	"api_url": "",
+	"lametric":{
+		"data_url": "https://developer.lametric.com/api/v1/dev/widget/update/APPURLHERE",
+		"access_token": "ACCESSTOKENHERE"
+	}
+}
