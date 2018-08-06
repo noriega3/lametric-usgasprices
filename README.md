@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/noriega3/lametric-usgasprices.svg?branch=master)](https://travis-ci.com/noriega3/lametric-usgasprices)
+
 # LaMetric-USGasPrices
 
 ## Description
