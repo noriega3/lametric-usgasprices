@@ -23,5 +23,8 @@ crontab -e
 0 */12 * * * cd /path/to/your/folder && node index.js
 ```
 
+## SERVER CHANGELOG
+08/06/2018 - Moved servers, periodic updates should be pushing to lametric again!
+
 ## GDPR
 - This app does not collect any user identifiable data. ``... but you already knew that.``
