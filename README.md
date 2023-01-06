@@ -1,10 +1,10 @@
 # USA Gas Prices App - LaMetric Time
 
 ## App Link
-[US Average Gas Prices](https://apps.lametric.com/apps/us_average_gas_prices/3918)
+[US Average Gas Prices](https://apps.lametric.com/apps/usa_average_gas_prices/3918)
 
 ## Description
-The backend of the [US Average Gas Prices](https://apps.lametric.com/apps/us_average_gas_prices/3918) app for the [LaMetric Time](https://lametric.com/).
+The backend of the [US Average Gas Prices](https://apps.lametric.com/apps/usa_average_gas_prices/3918) app for the [LaMetric Time](https://lametric.com/).
 
 Prices are updated **once per day**.
 
