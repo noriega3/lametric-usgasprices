@@ -1,53 +1,72 @@
-const request = require("request")
-const config = require("./config.json") //a config.json file that has the lametric data url and access token
+import * as dotenv from "dotenv";
+dotenv.config();
+import fetch from "node-fetch";
 
-const api_options = {
-	method: 'POST',
-	url: config.api_url,
-	headers: {
-		'cache-control': 'no-cache',
-		'content-type': 'application/x-www-form-urlencoded',
-		'accept': 'application/json, text/javascript, */*; q=0.01'
-	},
-	form: {
-		'action': 'states_cost_data',
-		'data[locL]': 'US',
-		'data[locR]': 'US'
-	}
-}
+/* ==== Start Utility Functions ==== */
 
-const lametric_options = {
-	method: 'POST',
-	url: config.lametric.data_url,
-	headers: {
-		'cache-control': 'no-cache',
-		'X-Access-Token': config.lametric.access_token,
-		'accept': 'application/json'
-	},
-	json: true,
-	body: {}
-}
+// Create frame for Lametric Push API
+const createFrame = (rawPrice, icon, index) => {
+  return {
+    text: "$" + Number.parseFloat(rawPrice).toFixed(2),
+    icon,
+    index,
+  };
+};
 
-//get gas info from api url
-request(api_options, function (error, response, body) {
-	if(error){ console.log(error) }
-	console.log(body)
+/* ==== End Utility Functions ==== */
 
-	const parsed = body ? JSON.parse(body) : false
+const init = async () => {
+  let gasAPI, gasAPIResponse, lmBody;
 
-	//massage the data
-	if(parsed && parsed.success){
-		lametric_options.body.frames = [
-			{"text": "AVG US gas prices","icon": "i11715", "index": 0},
-			{"text": "$"+(parsed.data.unleaded[0].slice(0, -5)),"icon": "i11711", "index": 1},
-			{"text": "$"+(parsed.data.midgrade[0].slice(0, -5)),"icon": "i11713", "index": 2},
-			{"text": "$"+(parsed.data.premium[0].slice(0, -5)),"icon": "i11714", "index": 3},
-			{"text": "$"+(parsed.data.diesel[0].slice(0, -5)),"icon": "i11221", "index": 4}
-		]
-		//send the request to lametric
-		request(lametric_options, function(err2,resp2,body2){
-			if(err2){ console.log(err2) }
-			console.log(body2)
-		})
-	}
-})
+  console.log('Retreving Gas Prices from API..')
+  // Ping the upstream GAS API for prices
+  gasAPI = await fetch(process.env.GAS_API_URL, {
+    method: "POST",
+    headers: {
+      "accept": "application/json, text/javascript",
+      "accept-language": "en-US",
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: process.env.GAS_API_PARAMS,
+  });
+  gasAPIResponse = await gasAPI.json();
+
+  // Check if API response is valid
+  if (!gasAPIResponse.success) {
+    //exit
+    console.error("Invalid Gas Response Found");
+    process.exit(1);
+  }
+
+  // Setup Body Frames for API
+  lmBody = {
+    frames: [
+      {
+        text: `Gas Price Averages - ${new Date().toLocaleDateString()} (USA)`,
+        icon: "51740",
+        index: 0,
+      },
+      createFrame(gasAPIResponse.data.unleaded[0], 11711, 1),
+      createFrame(gasAPIResponse.data.midgrade[0], 11713, 2),
+      createFrame(gasAPIResponse.data.premium[0], 11714, 3),
+      createFrame(gasAPIResponse.data.diesel[0], 11221, 4),
+    ],
+  };
+
+  // Send to LaMetric Push API
+  console.log('Pushing to LaMetric..')
+  await fetch(process.env.LAMETRIC_DATA_URL, {
+    method: "POST",
+    headers: {
+      "cache-control": "no-cache",
+      "X-Access-Token": process.env.LAMETRIC_TOKEN,
+      "accept": "application/json",
+    },
+    body: JSON.stringify(lmBody),
+  });
+
+  console.log("Done!");
+  process.exit(0);
+};
+
+init();

@@ -1,10 +1,10 @@
 {
   "name": "lametric-usgasprices",
-  "version": "1.0.0",
-  "description": "pings a server with the national averages of gas prices every x hours",
+  "version": "6.0.0",
+  "description": "Pings a gas api, then returns that data to the lametric servers. Updates daily.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -18,11 +18,13 @@
   ],
   "author": "Brian Noriega",
   "license": "MIT",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/noriega3/lametric-usgasprices/issues"
   },
   "homepage": "https://github.com/noriega3/lametric-usgasprices#readme",
   "dependencies": {
-    "request": "^2.81.0"
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.0"
   }
 }
