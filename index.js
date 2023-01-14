@@ -4,19 +4,60 @@ import fetch from "node-fetch";
 
 /* ==== Start Utility Functions ==== */
 
-// Create frame for Lametric Push API
-const createFrame = (rawPrice, icon, index) => {
+// Create frames for Lametric Push API
+const createDateBody = () => {
   return {
-    text: "$" + Number.parseFloat(rawPrice).toFixed(2),
-    icon,
-    index,
+      frames: [
+        {
+          text: new Date().toLocaleDateString(),
+          icon: 51740
+        }
+      ]
+  }
+}
+const createChannelBody = (rawPrices, icon) => {
+
+  let diffYesterday = Number.parseFloat(rawPrices[1]-rawPrices[2]).toFixed(2);
+  diffYesterday = diffYesterday == 0 ? '$-.--' : "$" + diffYesterday
+  let diffIcon = diffYesterday == '$-.--'? 401 : (diffYesterday > 0 ? 37021 : 37019) ;
+  console.log(diffYesterday, diffIcon, Number.parseFloat(rawPrices[0]).toFixed(2))
+  return {
+    frames: [
+      {
+        text: "$" + Number.parseFloat(rawPrices[0]).toFixed(2),
+        icon
+      },
+      {
+
+        text: diffYesterday,
+        icon: diffIcon
+      }
+    ]
   };
 };
+const pushToChannel = async (channel, body) => {
+console.log(JSON.stringify(body))
+console.log(channel)
+  console.log(`${process.env.LAMETRIC_DATA_URL}?channels=${channel}`)
+  const response = await fetch(`${process.env.LAMETRIC_DATA_URL}?channels=${channel}`, {
+    method: "POST",
+    headers: {
+      "cache-control": "no-cache",
+      "X-Access-Token": process.env.LAMETRIC_TOKEN,
+      "accept": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  console.log('response', response)
+
+  return true;
+}
 
 /* ==== End Utility Functions ==== */
 
 const init = async () => {
-  let gasAPI, gasAPIResponse, lmBody;
+  let gasAPI, gasAPIResponse;
 
   console.log('Retreving Gas Prices from API..')
   // Ping the upstream GAS API for prices
@@ -38,35 +79,15 @@ const init = async () => {
     process.exit(1);
   }
 
-  // Setup Body Frames for API
-  lmBody = {
-    frames: [
-      {
-        text: `Gas Price Averages - ${new Date().toLocaleDateString()} (USA)`,
-        icon: "51740",
-        index: 0,
-      },
-      createFrame(gasAPIResponse.data.unleaded[0], 11711, 1),
-      createFrame(gasAPIResponse.data.midgrade[0], 11713, 2),
-      createFrame(gasAPIResponse.data.premium[0], 11714, 3),
-      createFrame(gasAPIResponse.data.diesel[0], 11221, 4),
-    ],
-  };
-
   // Send to LaMetric Push API
   console.log('Pushing to LaMetric..')
-  await fetch(process.env.LAMETRIC_DATA_URL, {
-    method: "POST",
-    headers: {
-      "cache-control": "no-cache",
-      "X-Access-Token": process.env.LAMETRIC_TOKEN,
-      "accept": "application/json",
-    },
-    body: JSON.stringify(lmBody),
-  });
-
+  await pushToChannel('Date', createDateBody())
+  await pushToChannel('Unleaded', createChannelBody(gasAPIResponse.data.unleaded, 11711))
+  await pushToChannel('Midgrade', createChannelBody(gasAPIResponse.data.midgrade, 11713))
+  await pushToChannel('Premium', createChannelBody(gasAPIResponse.data.premium, 11714))
+  await pushToChannel('Diesel', createChannelBody(gasAPIResponse.data.diesel, 11221))
   console.log("Done!");
-  process.exit(0);
+  //process.exit(0);
 };
 
 init();
