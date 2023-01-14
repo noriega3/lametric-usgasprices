@@ -5,11 +5,12 @@ import fetch from "node-fetch";
 /* ==== Start Utility Functions ==== */
 
 // Create frame for Lametric Push API
-const createFrame = (rawPrice, icon, index) => {
+const createFrame = (rawPrice, icon, index, duration = 1000) => {
   return {
     text: "$" + Number.parseFloat(rawPrice).toFixed(2),
     icon,
     index,
+    duration
   };
 };
 
@@ -45,11 +46,12 @@ const init = async () => {
         text: `Gas Price Averages - ${new Date().toLocaleDateString()} (USA)`,
         icon: "51740",
         index: 0,
+        duration: 1000,
       },
-      createFrame(gasAPIResponse.data.unleaded[0], 11711, 1),
-      createFrame(gasAPIResponse.data.midgrade[0], 11713, 2),
-      createFrame(gasAPIResponse.data.premium[0], 11714, 3),
-      createFrame(gasAPIResponse.data.diesel[0], 11221, 4),
+      createFrame(gasAPIResponse.data.unleaded[0], 11711, 1, 5000),
+      createFrame(gasAPIResponse.data.midgrade[0], 11713, 2, 5000),
+      createFrame(gasAPIResponse.data.premium[0], 11714, 3, 5000),
+      createFrame(gasAPIResponse.data.diesel[0], 11221, 4, 5000),
     ],
   };
 
